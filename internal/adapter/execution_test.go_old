@@ -1,0 +1,74 @@
+package adapter
+
+import (
+	"testing"
+	"time"
+
+	"github.com/mabuhasna8/IntelliOps/apps/agent/executor"
+	"github.com/mabuhasna8/IntelliOps/internal/contracts"
+)
+
+func TestToExecutionEnvelope_MapsExecutorResult(t *testing.T) {
+	startedAt := time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)
+
+	input := executor.Result{
+		StartedAt: startedAt,
+		Stdout:    "hello stdout",
+		Stderr:    "hello stderr",
+		Simulated: true,
+		Host:      "test-host",
+	}
+
+	envelope := ToExecutionEnvelope(input)
+
+	if !envelope.StartedAt.Equal(startedAt) {
+		t.Fatalf(
+			"unexpected StartedAt: got %v, want %v",
+			envelope.StartedAt,
+			startedAt,
+		)
+	}
+
+	if envelope.Stdout.Content != "hello stdout" {
+		t.Fatalf(
+			"unexpected stdout: got %q, want %q",
+			envelope.Stdout.Content,
+			"hello stdout",
+		)
+	}
+
+	if envelope.Stderr.Content != "hello stderr" {
+		t.Fatalf(
+			"unexpected stderr: got %q, want %q",
+			envelope.Stderr.Content,
+			"hello stderr",
+		)
+	}
+
+	if got := envelope.Metadata["simulated"]; got != true {
+		t.Fatalf("unexpected simulated metadata: got %v", got)
+	}
+
+	if got := envelope.Metadata["host"]; got != "test-host" {
+		t.Fatalf("unexpected host metadata: got %v", got)
+	}
+}
+
+func TestToExecutionEnvelope_HandlesEmptyResult(t *testing.T) {
+	envelope := ToExecutionEnvelope(executor.Result{})
+
+	if envelope.Metadata == nil {
+		t.Fatal("expected metadata to be initialized")
+	}
+
+	if envelope.Stdout.Content != "" {
+		t.Fatalf("expected empty stdout, got %q", envelope.Stdout.Content)
+	}
+
+	if envelope.Stderr.Content != "" {
+		t.Fatalf("expected empty stderr, got %q", envelope.Stderr.Content)
+	}
+}
+
+// Compile-time assertion that the expected contract type remains usable.
+//var _ contracts.ExecutionEnvelope

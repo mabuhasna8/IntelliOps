@@ -1,0 +1,9 @@
+name: compile-error
+outcome:
+  exit_code: 1
+  stdout: ""
+  stderr: "undefined: buildTarget"
+  metadata:
+    expected_classification: "build.compilation_error"
+    expected_action: "stop"
+

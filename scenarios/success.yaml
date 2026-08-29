@@ -1,0 +1,9 @@
+name: success
+outcome:
+  exit_code: 0
+  stdout: "build completed"
+  stderr: ""
+  metadata:
+    expected_classification: "build.success"
+    expected_action: "continue"
+
